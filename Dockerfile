@@ -1,6 +1,6 @@
 FROM fedora
 MAINTAINER http://fedoraproject.org/wiki/Cloud
-WORKDIR /app
+RUN mkdir app
 
 # ATOMIC CLI run command
 
@@ -14,18 +14,18 @@ RUN npm install -g yarn
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
 RUN source ~/.bashrc && nvm install 15 
 RUN source ~/.bashrc && nvm use 15
-
+RUN cd app
 # Set port for nodejs to listen on and expose it
 ENV PORT 8080
 EXPOSE 8080
 EXPOSE 27017
 # Set production environment for nodejs application
-COPY . /app
+COPY . .
 RUN export NODE_OPTIONS=--openssl-legacy-provider
 
 RUN yarn cache clean --force
 
 RUN yarn setup
-RUN sudo yarn bootstrap
+RUN yarn bootstrap
 RUN yarn --openssl-legacy-provider build 
 CMD ["yarn", "start"] 
