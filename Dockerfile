@@ -21,7 +21,7 @@ EXPOSE 8080
 EXPOSE 27017
 # Set production environment for nodejs application
 COPY . .
-RUN sudo export NODE_OPTIONS=--openssl-legacy-provider
+RUN export NODE_OPTIONS=--openssl-legacy-provider
 
 RUN sudo yarn cache clean --force
 
