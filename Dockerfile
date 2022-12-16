@@ -12,8 +12,8 @@ RUN sudo node -v
 RUN sudo npm -v
 RUN sudo npm install -g yarn
 RUN sudo curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
-RUN sudo source ~/.bashrc && nvm install 15 
-RUN sudo source ~/.bashrc && nvm use 15
+RUN source ~/.bashrc && nvm install 15 
+RUN source ~/.bashrc && nvm use 15
 RUN cd app
 # Set port for nodejs to listen on and expose it
 ENV PORT 8080
