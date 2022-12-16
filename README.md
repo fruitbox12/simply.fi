@@ -6,7 +6,7 @@ simple.Fi  is a low code/no code workflow automation application, focusing on in
 
 ![simple.Fi ](./assets/simple.Fi _brand.png)
 
-![simple.Fi  Screenshot](./assets/screenshot_outerbridge.jpg)
+![simple.Fi  Screenshot](https://raw.githubusercontent.com/fruitbox12/simply.fi/e838798fe04e760ad907ba7a9627e8bf06643e79/packages/ui/src/assets/download.png)
 
 ## 💡Why another workflow automation tool?
 
