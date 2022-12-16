@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - A Pen by Dylan</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<html lang="en">
+  <head>
+    <style>body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #1b1a1a;
+}
+
+.water {
+  fill: #212424;
+}
+
+.land {
+  fill: #15c06a;
+  stroke: rgba(85, 98, 112, 0.3);
+  stroke-width: 0.7px;
+}
+
+.land:hover {
+  fill: #8bff81;
+  stroke-width: 1px;
+}
+
+.focused {
+  fill: rgba(196, 77, 88, 1);
+}
+
+select {
+  position: absolute;
+  top: 5px;
+  border: solid #ccc 1px;
+  padding: 3px;
+  box-shadow: inset 1px 1px 2px #ddd8dc;
+}
+
+.countryTooltip {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  background: #fff;
+  padding: 5px;
+  text-align: left;
+  border: solid #ccc 1px;
+  color: #666;
+  font-size: 14px;
+  font-family: Gilroy;
+}
+
+.flex_container {
+  overflow-x: hidden;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.globe_container {
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
+  cursor: move;
+}
+
+#chart {
+  width: 100vw;
+  text-align: center;
+  margin-top: 0vh;
+  height: 100vh;
+}</style>
+    <meta charset="utf-8" />
+    <title>Earth globe</title>
+    <link rel="stylesheet" href="../src/style.css" />
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://d3js.org/queue.v1.min.js"></script>
+  </head>
+  <body>
+    <div class="flex_container">
+      <div class="globe_container" style="width: 100vw; height: 100vh;">
+        <svg id="chart" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+    <script>var width = window.innerWidth,
+  height = window.innerHeight,
+  sens = 0.5,
+  scale0 = (width - 1) / 2 / Math.PI,
+  focused;
+
+//Setting projection
+var aspect = width / height,
+  chart = d3.select('#chart'),
+  center = [width / 2, height / 2];
+
+var projection = d3.geo
+  .orthographic()
+  .scale(245)
+  .rotate([90, -23])
+  .translate([width / 2, height / 2])
+  .clipAngle(90);
+
+var path = d3.geo.path().projection(projection);
+//Setup zoom behavior
+var zoom = d3.behavior
+  .zoom()
+  //  .translate([width / 2, height / 2])
+  .scale(scale0)
+  .scaleExtent([scale0, 8 * scale0])
+  .on('zoom', zoomed);
+//SVG container
+
+var svg = d3
+  .select('#chart')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+//Adding water
+svg.call(zoom).call(zoom.event);
+
+svg
+  .append('path')
+  .datum({ type: 'Sphere' })
+  .attr('class', 'water')
+  .attr('d', path);
+
+var markerGroup = svg.append('g');
+
+function zoomed() {
+  projection
+    // .translate(zoom.translate())
+    .scale(zoom.scale());
+
+  svg.selectAll('path').attr('d', path);
+
+  drawMarkers();
+}
+
+var countryTooltip = d3
+  .select('body')
+  .append('div')
+  .attr('class', 'countryTooltip');
+// countryList = d3
+//   .select('body')
+//   .append('select')
+//   .attr('name', 'countries');
+
+queue()
+  .defer(
+    d3.json,
+    'https://rawgit.com/kvyb/2bee4c32f30fd3dc3d56c8086eaf1da1/raw/2cd491b30d9600102b2cbeda89d1d06df09ab2ba/world-110m.json'
+  )
+  .defer(
+    d3.csv,
+    'https://cdn.rawgit.com/kvyb/8b916c9d64f15b55ef21f8941f1ef54c/raw/14c850683a5163d245d1901d06959614e479f8d3/world-110m-country-names.csv'
+  )
+  .await(ready);
+
+//Main function
+
+locations = [
+  {
+    latitude: 22.8905,
+    longitude: -109.9167,
+    city: 'Cabo',
+    count: 25000,
+    id: '1',
+    link: 'https://agentinc.co/cabo/'
+  },
+  {
+    latitude: 33.4942,
+    longitude: -111.9261,
+    city: 'Scottsdale',
+    count: 13000,
+    id: '2',
+    link: 'https://agentinc.co/regions/scottsdale/'
+  },
+  {
+    latitude: 33.985,
+    longitude: -118.4695,
+    city: 'Venice, CA',
+    count: 8900,
+    id: '3',
+    link: 'https://agentinc.co/communities/venice/'
+  }
+];
+
+function renderCityContent(loc_id, find_only) {
+  var loc = locations.filter(loc => loc.id === loc_id)[0];
+  if (find_only) return loc;
+  return `${loc.city}: ${loc.count} for Sale`;
+}
+
+function drawMarkers() {
+  (function() {
+    d3.select('svg')
+      .selectAll('circle')
+      .remove();
+
+    if (!markerGroup) {
+      return;
+    }
+
+    const markers = markerGroup.selectAll('circle').data(locations);
+
+    markers
+      .enter()
+      .append('circle')
+      //.merge(markers)
+      .attr('cx', d => projection([d.longitude, d.latitude])[0])
+      .attr('cy', d => projection([d.longitude, d.latitude])[1])
+      .attr('fill', d => {
+        const coordinate = [d.longitude, d.latitude];
+        gdistance = d3.geoDistance(coordinate, projection.invert(center));
+        return gdistance > 1.57 ? 'none' : 'steelblue';
+      })
+      .attr('r', 7)
+      .on('mouseover', function(d) {
+        countryTooltip
+          .html(renderCityContent(d.id))
+          .style('left', d3.event.pageX + 7 + 'px')
+          .style('top', d3.event.pageY - 15 + 'px')
+          .style('display', 'block')
+          .style('opacity', 1);
+      })
+      .on('mouseout', function(d) {
+        countryTooltip.style('opacity', 0).style('display', 'none');
+      })
+      .on('mousemove', function(d) {
+        countryTooltip
+          .style('left', d3.event.pageX + 7 + 'px')
+          .style('top', d3.event.pageY - 15 + 'px');
+      })
+      .on('click', function(d) {
+        window.location.href = d.link;
+      });
+
+    markerGroup.each(function() {
+      this.parentNode.appendChild(this);
+    });
+  })();
+}
+
+function ready(error, world, countryData) {
+  var countryById = {},
+    countries = topojson.feature(world, world.objects.countries).features;
+
+  //Adding countries to select
+
+  // locations.forEach(function(d) {
+  //   option = countryList.append('option');
+  //   option.text(d.city);
+  //   option.property('value', d.id);
+  // });
+
+  //Drawing countries on the globe
+
+  var world = svg
+    .selectAll('path.land')
+    .data(countries)
+    .enter()
+    .append('path')
+    .attr('class', 'land')
+    .attr('d', path)
+
+    //Drag event
+
+    .call(
+      d3.behavior
+        .drag()
+        .origin(function() {
+          var r = projection.rotate();
+          return { x: r[0] / sens, y: -r[1] / sens };
+        })
+        .on('drag', function() {
+          var rotate = projection.rotate();
+          projection.rotate([d3.event.x * sens, -d3.event.y * sens, rotate[2]]);
+          svg.selectAll('path.land').attr('d', path);
+          svg.selectAll('.focused').classed('focused', (focused = false));
+          drawMarkers();
+        })
+    );
+
+  //Mouse events
+
+  // .on('mouseover', function(d) {
+  //   countryTooltip
+  //     .html(countryById[d.id])
+  //     .style('left', d3.event.pageX + 7 + 'px')
+  //     .style('top', d3.event.pageY - 15 + 'px')
+  //     .style('display', 'block')
+  //     .style('opacity', 1);
+  // })
+  // .on('mouseout', function(d) {
+  //   countryTooltip.style('opacity', 0).style('display', 'none');
+  // })
+  // .on('mousemove', function(d) {
+  //   countryTooltip
+  //     .style('left', d3.event.pageX + 7 + 'px')
+  //     .style('top', d3.event.pageY - 15 + 'px');
+  // });
+
+  //Country focus on option select
+
+  // d3.select('select').on('change', function() {
+  //   var rotate = projection.rotate(),
+  //     focusedCountry = renderCityContent(
+  //       document.querySelector('[name=countries] option:checked').value,
+  //       true
+  //     ),
+  //     p = d3.geo.centroid([focusedCountry.longitude, focusedCountry.latitude]);
+
+  //   svg.selectAll('.focused').classed('focused', (focused = false));
+
+  //   //Globe rotating
+
+  //   (function transition() {
+  //     d3.transition()
+  //       .duration(2500)
+  //       .tween('rotate', function() {
+  //         var r = d3.interpolate(projection.rotate(), [
+  //           -p.longitude,
+  //           -p.latitude
+  //         ]);
+  //         return function(t) {
+  //           projection.rotate(r(t));
+  //           //            drawMarkers();
+
+  //           svg
+  //             .selectAll('path')
+  //             .attr('d', path)
+  //             .classed('focused', function(d, i) {
+  //               return d.id == focusedCountry.id ? (focused = d) : false;
+  //             });
+  //         };
+  //       });
+  //   })();
+  // });
+
+  drawMarkers();
+
+  function country(cnt, sel) {
+    for (var i = 0, l = cnt.length; i < l; i++) {
+      if (cnt[i].id == sel.value) {
+        return cnt[i];
+      }
+    }
+  }
+}
+</script>
+  </body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>

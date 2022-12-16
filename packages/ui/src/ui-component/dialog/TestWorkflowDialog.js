@@ -74,7 +74,7 @@ const TestWorkflowDialog = ({ show, dialogProps, onCancel, onItemClick }) => {
                         id='input-search-node'
                         value={searchValue}
                         onChange={(e) => filterSearch(e.target.value)}
-                        placeholder='Search nodes'
+                        placeholder='Search functions'
                         startAdornment={
                             <InputAdornment position='start'>
                                 <IconSearch stroke={1.5} size='1rem' color={theme.palette.grey[500]} />

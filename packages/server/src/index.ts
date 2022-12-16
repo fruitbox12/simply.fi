@@ -1400,7 +1400,7 @@ export class App {
 
             await Promise.all(removePromises)
         } catch (e) {
-            console.error(`❌[server]: Outerbridge Server shut down error: ${e}`)
+            console.error(`❌[server]:  Server shut down error: ${e}`)
         }
     }
 }
@@ -1430,7 +1430,7 @@ export async function start(): Promise<void> {
     await serverApp.config(io)
 
     server.listen(port, () => {
-        console.info(`⚡️[server]: Outerbridge Server is listening at ${port}`)
+        console.info(`⚡️[server]:  Server is listening at ${port}`)
     })
 }
 

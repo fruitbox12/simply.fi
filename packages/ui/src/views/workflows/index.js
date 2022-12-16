@@ -76,7 +76,7 @@ const Workflows = () => {
     return (
         <MainCard>
             <Stack flexDirection='row'>
-                <h1>Workflows</h1>
+                <h1>Jobs</h1>
                 <Grid sx={{ mb: 1.25 }} container direction='row'>
                     <Box sx={{ flexGrow: 1 }} />
                     <Grid item>
@@ -100,7 +100,7 @@ const Workflows = () => {
                     <Box sx={{ p: 2, height: 'auto' }}>
                         <img style={{ objectFit: 'cover', height: '30vh', width: 'auto' }} src={WorkflowEmptySVG} alt='WorkflowEmptySVG' />
                     </Box>
-                    <div>No Workflows Yet</div>
+                    <div>No workbooks Created</div>
                 </Stack>
             )}
         </MainCard>

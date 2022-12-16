@@ -14,7 +14,7 @@ import { networks } from 'store/constant'
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon'
 
 const CardWrapper = styled(MainCard)(({ theme }) => ({
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e2422',
     color: theme.darkTextPrimary,
     overflow: 'hidden',
     position: 'relative',

@@ -1,12 +1,12 @@
 <!-- markdownlint-disable MD030 -->
 
-# Outerbridge - Automate Web3 and Web2 applications
+# simple.Fi - Automate Web3 and Web2 applications
 
-Outerbridge is a low code/no code workflow automation application, focusing on integrating both on-chain and off-chain applications. The project is licensed under [Apache License Version 2.0](LICENSE.md), source available and free to self-host.
+simple.Fi  is a low code/no code workflow automation application, focusing on integrating both on-chain and off-chain applications. The project is licensed under [Apache License Version 2.0](LICENSE.md), source available and free to self-host.
 
-![Outerbridge](./assets/outerbridge_brand.png)
+![simple.Fi ](./assets/simple.Fi _brand.png)
 
-![Outerbridge Screenshot](./assets/screenshot_outerbridge.jpg)
+![simple.Fi  Screenshot](./assets/screenshot_outerbridge.jpg)
 
 ## 💡Why another workflow automation tool?
 
@@ -14,23 +14,23 @@ There are many awesome automation tools out there, however there isn't one that 
 
 ## ⚡Quick Start
 
-Watch [Outerbridge Quickstart Demo](https://www.youtube.com/watch?v=x-AfrkKvZ4M) on Youtube (4mins)
+Watch [simple.Fi  Quickstart Demo](https://www.youtube.com/watch?v=x-AfrkKvZ4M) on Youtube (4mins)
 
 1. Install MongoDB [locally](https://www.mongodb.com/docs/manual/administration/install-community/) OR follow the guide of using MongoDB Atlas [here](https://docs.outerbridge.io/get-started#mongodb-atlas)
 2. Install Outerbridge
     ```bash
-    npm install -g outerbridge
+    npm install -g simple.Fi 
     ```
-3. Start Outerbridge
+3. Start simple.Fi 
 
     ```bash
-    npx outerbridge start
+    npx simple.Fi  start
     ```
 
     If using MongoDB Atlas
 
     ```bash
-    npx outerbridge start --mongourl=mongodb+srv://<user>:<password>@<your-cluster>.mongodb.net/outerbridge?retryWrites=true&w=majority
+    npx simple.Fi  start --mongourl=mongodb+srv://<user>:<password>@<your-cluster>.mongodb.net/outerbridge?retryWrites=true&w=majority
     ```
 
 4. Open [http://localhost:3000](http://localhost:3000)
@@ -65,7 +65,7 @@ Outerbridge has 3 different modules in a single mono repository.
 1. Clone the repository
 
     ```bash
-    git clone https://github.com/Outerbridgeio/Outerbridge.git
+    git clone https://github.com/simple.Fi /simple.Fi .git
     ```
 
 2. Go into repository folder
@@ -110,11 +110,11 @@ Outerbridge has 3 different modules in a single mono repository.
 
 ## 📖 Documentation
 
-Official Outerbridge docs can be found under: [https://docs.outerbridge.io](https://docs.outerbridge.io)
+Official simple.Fi  docs can be found under: [https://docs.simple.Fi .io](https://docs.simple.Fi .io)
 
 ## 💻 Cloud Hosted
 
--   [Cloud Hosted](https://app.outerbridge.io) version of Outerbridge.
+-   [Cloud Hosted](https://app.simple.Fi .io) version of simple.Fi .
 
 ## 🌐 Self Host
 
@@ -123,11 +123,11 @@ Official Outerbridge docs can be found under: [https://docs.outerbridge.io](http
 
 ## 🙋 Support
 
-Feel free to ask any questions, raise problems, and request new features in [discussion](https://github.com/Outerbridgeio/Outerbridge/discussions)
+Feel free to ask any questions, raise problems, and request new features in [discussion](https://github.com/simple.Fi /simple.Fi /discussions)
 
 ## 🙌 Contributing
 
-See [contributing guide](CONTRIBUTING.md). Reach out to us at [Discord](https://discord.gg/Y9VE4ykPDJ) if you have any questions or issues.
+See [contributing guide](CONTRIBUTING.md). Reach out to us at [Discord](https://discord.gg/simple.Fi ) if you have any questions or issues.
 
 ## 📄 License
 

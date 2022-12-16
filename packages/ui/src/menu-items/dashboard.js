@@ -13,7 +13,7 @@ const dashboard = {
     children: [
         {
             id: 'workflows',
-            title: 'Workflows',
+            title: 'Automation Jobs',
             type: 'item',
             url: '/workflows',
             icon: icons.IconHierarchy,
@@ -21,7 +21,7 @@ const dashboard = {
         },
         {
             id: 'contracts',
-            title: 'Contracts',
+            title: 'Register Smart Contracts',
             type: 'item',
             url: '/contracts',
             icon: icons.IconEditCircle,
@@ -29,7 +29,7 @@ const dashboard = {
         },
         {
             id: 'wallets',
-            title: 'Wallets',
+            title: 'Identity Access Management',
             type: 'item',
             url: '/wallets',
             icon: icons.IconWallet,

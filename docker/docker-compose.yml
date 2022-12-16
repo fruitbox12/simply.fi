@@ -11,7 +11,7 @@ services:
       - MONGO_INITDB_DATABASE=outerbridge
   
   outerbridge:
-    image: outerbridgeio/outerbridge
+    image: simplifi:latest
     restart: always
     environment:
       - MONGO_HOST=${MONGO_HOST}
@@ -24,4 +24,4 @@ services:
       - mongo
     volumes:
       - ~/.outerbridge:/root/.outerbridge
-    command: /bin/sh -c "sleep 3; outerbridge start"
+    command: yarn start
