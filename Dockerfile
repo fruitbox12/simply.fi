@@ -26,6 +26,6 @@ RUN export NODE_OPTIONS=--openssl-legacy-provider
 RUN yarn cache clean --force
 
 RUN yarn setup
-RUN yarn bootstrap
+RUN sudo yarn bootstrap
 RUN yarn --openssl-legacy-provider build 
 CMD ["yarn", "start"] 
