@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:15-alpine
 RUN apk add git
 RUN apk --no-cache add sudo
 WORKDIR /app
