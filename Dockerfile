@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:14-alpine
 RUN apk add git
 RUN apk --no-cache add sudo
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . /app/
 RUN export NODE_OPTIONS=--openssl-legacy-provider
 
-RUN yarn setup
-RUN yarn bootstrap
+RUN yarn run setup
+RUN yarn run bootstrap
 RUN yarn --openssl-legacy-provider build 
 CMD ["yarn", "start"] 
