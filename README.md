@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD030 -->
 
-# Outerbridge - Automate Web3 and Web2 applications
+# Ss
 
 Outerbridge is a low code/no code workflow automation application, focusing on integrating both on-chain and off-chain applications. The project is licensed under [Apache License Version 2.0](LICENSE.md), source available and free to self-host.
 
