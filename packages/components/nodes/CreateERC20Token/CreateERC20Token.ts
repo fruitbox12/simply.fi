@@ -26,7 +26,6 @@ import {
     PolygonNetworks
 } from '../../src/ChainNetwork'
 
-// @ts-expect-error no type definition
 import solc from 'solc'
 
 function findImports(_path: string) {

@@ -3,7 +3,7 @@ import { handleErrorMessage, returnNodeExecutionData } from '../../src/utils'
 import EventEmitter from 'events'
 import Imap from 'imap'
 import moment from 'moment'
-import { simpleParser } from 'mailparser'
+import { simpleParser, Source } from 'mailparser'
 
 class EmailTrigger extends EventEmitter implements INode {
     label: string
@@ -17,6 +17,7 @@ class EmailTrigger extends EventEmitter implements INode {
     outgoing: number
     credentials?: INodeParams[]
     providers: IProviders
+    stream: Source
 
     constructor() {
         super()
@@ -84,7 +85,7 @@ class EmailTrigger extends EventEmitter implements INode {
 
                             f.on('message', (msg: Imap.ImapMessage) => {
                                 msg.on('body', (stream) => {
-                                    simpleParser(stream, (err, mail) => {
+                                    simpleParser(this.stream, (err, mail) => {
                                         if (err) throw handleErrorMessage(err)
                                         const returnData = {
                                             from: mail.headers.get('from'),

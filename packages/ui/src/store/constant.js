@@ -346,7 +346,7 @@ export const contract_details = {
             label: 'Contract Name',
             name: 'name',
             type: 'string',
-            description: 'Name the contract to make it easier to identify it in Outerbridge',
+            description: 'Name the contract to make it easier to identify it in Weave',
             default: ''
         },
         {

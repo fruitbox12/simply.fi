@@ -2,26 +2,14 @@ version: '3.1'
 
 services:
 
-  mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
+  weave:
+    image: weav:latest
     restart: always
     environment:
-      - MONGO_INITDB_DATABASE=outerbridge
-  
-  outerbridge:
-    image: outerbridgeio/outerbridge
-    restart: always
-    environment:
-      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_URL=${MONGO_URL}
       - PASSPHRASE=${PASSPHRASE}
       - ENABLE_TUNNEL=${ENABLE_TUNNEL}
       - PORT=${PORT}
     ports:
       - "${PORT}:${PORT}"
-    links:
-      - mongo
-    volumes:
-      - ~/.outerbridge:/root/.outerbridge
-    command: /bin/sh -c "sleep 3; outerbridge start"
+

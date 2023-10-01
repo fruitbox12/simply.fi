@@ -2,19 +2,20 @@ import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 import { useState } from 'react'
 
-// material-ui
-import { useTheme } from '@mui/material/styles'
-import { Avatar, Box, ButtonBase, Switch } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles';
+import { Avatar, Box, ButtonBase, Switch, TextField } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 // project imports
-import LogoSection from '../LogoSection'
+import LogoSection from '../LogoSection';
 
 // assets
-import { IconMenu2 } from '@tabler/icons'
+import { IconMenu2 } from '@tabler/icons';
 
 // store
-import { SET_DARKMODE } from 'store/actions'
+import { SET_DARKMODE } from 'store/actions';
+
+
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
@@ -65,63 +66,70 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     }
 }))
 
+
 const Header = ({ handleLeftDrawerToggle }) => {
-    const theme = useTheme()
-    const customization = useSelector((state) => state.customization)
+  const theme = useTheme();
+  const customization = useSelector((state) => state.customization);
 
-    const [isDark, setIsDark] = useState(customization.isDarkMode)
-    const dispatch = useDispatch()
+  const [isDark, setIsDark] = useState(customization.isDarkMode);
+  const [searchText, setSearchText] = useState(''); // Added state for search input
+  const dispatch = useDispatch();
 
-    const changeDarkMode = () => {
-        dispatch({ type: SET_DARKMODE, isDarkMode: !isDark })
-        setIsDark((isDark) => !isDark)
-        localStorage.setItem('isDarkMode', !isDark)
-    }
+  const changeDarkMode = () => {
+    dispatch({ type: SET_DARKMODE, isDarkMode: !isDark });
+    setIsDark((isDark) => !isDark);
+    localStorage.setItem('isDarkMode', !isDark);
+  };
 
-    return (
-        <>
-            {/* logo & toggler button */}
-            <Box
-                sx={{
-                    width: 228,
-                    display: 'flex',
-                    [theme.breakpoints.down('md')]: {
-                        width: 'auto'
-                    }
-                }}
-            >
-                <Box component='span' sx={{ display: { xs: 'none', md: 'block' }, flexGrow: 1 }}>
-                    <LogoSection />
-                </Box>
-                <ButtonBase sx={{ borderRadius: '12px', overflow: 'hidden' }}>
-                    <Avatar
-                        variant='rounded'
-                        sx={{
-                            ...theme.typography.commonAvatar,
-                            ...theme.typography.mediumAvatar,
-                            transition: 'all .2s ease-in-out',
-                            background: theme.palette.secondary.light,
-                            color: theme.palette.secondary.dark,
-                            '&:hover': {
-                                background: theme.palette.secondary.dark,
-                                color: theme.palette.secondary.light
-                            }
-                        }}
-                        onClick={handleLeftDrawerToggle}
-                        color='inherit'
-                    >
-                        <IconMenu2 stroke={1.5} size='1.3rem' />
-                    </Avatar>
-                </ButtonBase>
-            </Box>
-            <Box sx={{ flexGrow: 1 }} />
-            <MaterialUISwitch checked={isDark} onChange={changeDarkMode} />
-        </>
-    )
-}
+  // Handler for search input change
+  const handleSearchInputChange = (event) => {
+    setSearchText(event.target.value);
+  };
+
+  // You can add your search functionality here using `searchText`
+
+  return (
+    <>
+      {/* logo, toggler button, and search bar */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+       
+        <ButtonBase sx={{ borderRadius: '12px', overflow: 'hidden' }}>
+          <Avatar
+            variant="rounded"
+            sx={{
+              // ... existing styles
+            }}
+            onClick={handleLeftDrawerToggle}
+            color="inherit"
+          >
+            <IconMenu2 stroke={1.5} size="1.3rem" />
+          </Avatar>
+        </ButtonBase>        <LogoSection />
+ <TextField
+          variant="outlined"
+          placeholder="Search..."
+          size="small"
+          value={searchText}
+          onChange={handleSearchInputChange}
+          sx={{
+            marginLeft: '16px',
+            width: '300px', // Adjust the width as needed
+          }}
+        />
+      </Box>
+      <Box sx={{ flexGrow: 1 }} />
+      <MaterialUISwitch checked={isDark} onChange={changeDarkMode} />
+    </>
+  );
+};
 
 Header.propTypes = {
-    handleLeftDrawerToggle: PropTypes.func
-}
+  handleLeftDrawerToggle: PropTypes.func,
+};
 
-export default Header
+export default Header;

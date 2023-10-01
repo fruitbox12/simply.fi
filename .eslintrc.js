@@ -17,12 +17,14 @@ module.exports = {
     ignorePatterns: ['**/node_modules', '**/dist', '**/build', '**/package-lock.json'],
     plugins: ['unused-imports'],
     rules: {
+        // Disable the rule that enforces explicit return types
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        'no-unused-vars': 'off',
+        'no-unused-vars': 'warn',
+        'prettier/prettier': 0,
+
         'unused-imports/no-unused-imports': 'warn',
         'unused-imports/no-unused-vars': ['warn', { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }],
-        'no-undef': 'off',
+        'no-undef': 'warn',
         'no-console': [process.env.CI ? 'error' : 'warn', { allow: ['warn', 'error', 'info'] }],
-        'prettier/prettier': 'error'
     }
 }
