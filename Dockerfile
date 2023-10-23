@@ -25,7 +25,6 @@ RUN yarn
 # Copy app source
 COPY . .
 
-
 RUN yarn build
 
 EXPOSE 3000

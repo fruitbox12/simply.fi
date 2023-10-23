@@ -179,7 +179,7 @@ const AddNodes = ({ nodesData, node }) => {
 
     return (
         <>
-            <StyledFab
+   <StyledFab
                 sx={{ left: 20, top: 20 }}
                 ref={anchorRef}
                 size='small'
@@ -237,8 +237,8 @@ const AddNodes = ({ nodesData, node }) => {
                                         <Divider />
                                     </Box>
                                     <Tabs variant='fullWidth' value={tabValue} onChange={handleTabChange} aria-label='nodes tabs'>
-                                        <Tab key={0} label='All' {...a11yProps(0)} />
-                                        <Tab key={1} label='Trigger' {...a11yProps(1)} />
+                                        <Tab key={0} label='Triggers' {...a11yProps(1)} />
+                                        <Tab key={1} label='All' {...a11yProps(0)} />
                                         <Tab key={2} label='Webhook' {...a11yProps(2)} />
                                         <Tab key={3} label='Action' {...a11yProps(3)} />
                                     </Tabs>
