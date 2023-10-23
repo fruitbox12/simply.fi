@@ -13,7 +13,7 @@ const dashboard = {
     children: [
         {
             id: 'workflows',
-            title: 'Workflows',
+            title: 'Threads',
             type: 'item',
             url: '/workflows',
             icon: icons.IconHierarchy,
@@ -37,7 +37,7 @@ const dashboard = {
         },
         {
             id: 'apikey',
-            title: 'API Keys',
+            title: 'Secrets',
             type: 'item',
             url: '/apikey',
             icon: icons.IconKey,

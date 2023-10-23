@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import ReactFlow, { addEdge, MiniMap, Controls, Background, useNodesState, useEdgesState } from 'reactflow'
+import ReactFlow, { addEdge, Controls, Background, useNodesState, useEdgesState } from 'reactflow'
 import 'reactflow/dist/style.css'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -689,7 +689,7 @@ const Canvas = () => {
             dispatch({
                 type: SET_WORKFLOW,
                 workflow: {
-                    name: 'Untitled workflow'
+                    name: 'Untitled Thread'
                 }
             })
         }
@@ -773,11 +773,7 @@ const Canvas = () => {
                                 onInit={setRfInstance}
                                 fitView
                             >
-                                <MiniMap
-                                    nodeStrokeColor={() => theme.palette.primary.main}
-                                    nodeColor={() => theme.palette.primary.main}
-                                    nodeBorderRadius={2}
-                                />
+                               
                                 <Controls
                                     style={{
                                         display: 'flex',
