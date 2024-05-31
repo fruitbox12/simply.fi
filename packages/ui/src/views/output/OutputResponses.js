@@ -1,232 +1,335 @@
-import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import PropTypes from 'prop-types'
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import Cronr from 'cronr';
 
 // material-ui
-import { Box, Button, Chip, CircularProgress, Stack, Typography, IconButton } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Button, Chip, CircularProgress, Stack, Typography, IconButton } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 // third party
-import ReactJson from 'react-json-view'
-import socketIOClient from 'socket.io-client'
+import ReactJson from 'react-json-view';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton'
-import AttachmentDialog from 'ui-component/dialog/AttachmentDialog'
-import HTMLDialog from 'ui-component/dialog/HTMLDialog'
-import ExpandDataDialog from 'ui-component/dialog/ExpandDataDialog'
-import { StyledButton } from 'ui-component/StyledButton'
+import AnimateButton from 'ui-component/extended/AnimateButton';
+import AttachmentDialog from 'ui-component/dialog/AttachmentDialog';
+import HTMLDialog from 'ui-component/dialog/HTMLDialog';
+import ExpandDataDialog from 'ui-component/dialog/ExpandDataDialog';
+import { StyledButton } from 'ui-component/StyledButton';
 
 // API
-import nodesApi from 'api/nodes'
-import webhookApi from 'api/webhooks'
+import nodesApi from 'api/nodes';
+import webhookApi from 'api/webhooks';
 
 // Hooks
-import useApi from 'hooks/useApi'
+import useApi from 'hooks/useApi';
 
 // icons
-import { IconExclamationMark, IconCopy, IconArrowUpRightCircle, IconX, IconArrowsMaximize } from '@tabler/icons'
+import { IconExclamationMark, IconCopy, IconArrowUpRightCircle, IconX, IconArrowsMaximize } from '@tabler/icons';
 
 // const
-import { baseURL } from 'store/constant'
+import { baseURL } from 'store/constant';
 
 // utils
-import { copyToClipboard } from 'utils/genericHelper'
+import { copyToClipboard } from 'utils/genericHelper';
 
 // ==============================|| OUTPUT RESPONSES ||============================== //
 
 const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, workflow, onSubmit }) => {
-    const theme = useTheme()
-    const customization = useSelector((state) => state.customization)
+    const theme = useTheme();
+    const customization = useSelector((state) => state.customization);
 
-    const [outputResponse, setOutputResponse] = useState([])
-    const [errorResponse, setErrorResponse] = useState(null)
-    const [nodeName, setNodeName] = useState(null)
-    const [nodeType, setNodeType] = useState(null)
-    const [nodeLabel, setNodeLabel] = useState(null)
-    const [isTestNodeBtnDisabled, disableTestNodeBtn] = useState(true)
-    const [testNodeLoading, setTestNodeLoading] = useState(null)
-    const [showHTMLDialog, setShowHTMLDialog] = useState(false)
-    const [HTMLDialogProps, setHTMLDialogProps] = useState({})
-    const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
-    const [attachmentDialogProps, setAttachmentDialogProps] = useState({})
-    const [showExpandDialog, setShowExpandDialog] = useState(false)
-    const [expandDialogProps, setExpandDialogProps] = useState({})
-    const [tunnelURL, setTunnelURL] = useState('')
+    const [outputResponse, setOutputResponse] = useState([]);
+    const [errorResponse, setErrorResponse] = useState(null);
+    const [nodeName, setNodeName] = useState(null);
+    const [nodeType, setNodeType] = useState(null);
+    const [nodeLabel, setNodeLabel] = useState(null);
+    const [isTestNodeBtnDisabled, disableTestNodeBtn] = useState(true);
+    const [testNodeLoading, setTestNodeLoading] = useState(false);
+    const [showHTMLDialog, setShowHTMLDialog] = useState(false);
+    const [HTMLDialogProps, setHTMLDialogProps] = useState({});
+    const [showAttachmentDialog, setShowAttachmentDialog] = useState(false);
+    const [attachmentDialogProps, setAttachmentDialogProps] = useState({});
+    const [showExpandDialog, setShowExpandDialog] = useState(false);
+    const [expandDialogProps, setExpandDialogProps] = useState({});
+    const [tunnelURL, setTunnelURL] = useState('');
 
-    const testNodeApi = useApi(nodesApi.testNode)
-    const getTunnelURLApi = useApi(webhookApi.getTunnelURL)
+    const testNodeApi = useApi(nodesApi.testNode);
+    const getTunnelURLApi = useApi(webhookApi.getTunnelURL);
+    const testWebhookApi = useApi(webhookApi.testWebhook);
+
+    const KV_STORAGE_BASE_URL = "https://renewing-heron-48789.kv.vercel-storage.com";
+    const AUTH_HEADER = { Authorization: `Bearer Ab6VASQgZmYxOTk0ZjUtN2JlNS00MDJjLThkN2ItZjg1ZmE5ZGNhZTUwNDJhMzU2MjQyMjExNDJkNmJmYWFjYjNmYmU4NDlkY2U=` };
+
+    async function getWorkflowState(key) {
+        try {
+            const response = await axios.get(`${KV_STORAGE_BASE_URL}/get/${key}`, { headers: AUTH_HEADER });
+            return typeof response.data === 'string' ? JSON.parse(response.data) : (Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error getting workflow state:', error);
+            return {};
+        }
+    }
+
+    async function setWorkflowState(key, state) {
+        try {
+            await axios.post(`${KV_STORAGE_BASE_URL}/set/${key}`, JSON.stringify(state), { headers: AUTH_HEADER });
+        } catch (error) {
+            console.error('Error setting workflow state:', error);
+        }
+    }
+
+    async function pollForWebhookResponse(uniqueId, nodeId) {
+        const pollingInterval = 5000; // 5 seconds
+
+        const poll = async () => {
+            try {
+                const data = await getWorkflowState('webhook_' + uniqueId, nodeId);
+                if (data && Object.keys(data).length !== 0) {
+                    // Handle the response data
+                    setOutputResponse(data);
+                    setTestNodeLoading(false);
+                    const formValues = {
+                        submit: true,
+                        needRetest: null,
+                        output: data,
+                    };
+                    onSubmit(formValues, 'outputResponses');
+                    // Stop polling once data is received
+                    clearInterval(pollInterval);
+                }
+            } catch (error) {
+                console.error("Polling error:", error);
+                // Optionally handle retry logic or stop polling after X attempts
+            }
+        };
+
+        // Start polling
+        let pollInterval = setInterval(poll, pollingInterval);
+    }
 
     const onTestNodeClick = (nodeType) => {
-        /* If workflow is already deployed, stop it first to be safe.
-         *  Because it could cause throttled calls
-         */
         if (workflow.deployed) {
-            setTestNodeLoading(false)
-            alert('Testing trigger requires stopping workflow. Please stop workflow first')
-            return
+            setTestNodeLoading(false);
+            alert('Testing trigger requires stopping workflow. Please stop workflow first');
+            return;
         }
 
         const testNodeBody = {
             nodes,
             edges,
             nodeId
-        }
+        };
 
         try {
-            setTestNodeLoading(true)
+            setTestNodeLoading(true);
 
-            if (nodeType === 'webhook') {
-                const socket = socketIOClient(baseURL)
+            if (nodeType === 'scheduler') {
+                simulateSchedulerNode();
+            } else if (nodeType === 'webhook') {
+                pollForWebhookResponse('webhook_' + workflow.shortId, nodeId);
+            } else {
+                const selectedNode = nodes.findIndex((nd) => nd.id === nodeId);
 
-                socket.on('connect', async () => {
-                    testNodeBody.clientId = socket.id
-                    testNodeApi.request(nodeFlowData.name, testNodeBody)
-                })
+                testNodeApi.request(selectedNode, testNodeBody);
+            }
+        } catch (error) {
+            setTestNodeLoading(false);
+            setOutputResponse([]);
+            setErrorResponse(error);
+            console.error(error);
+        }
+    };
 
-                socket.on('testWebhookNodeResponse', (data) => {
-                    setOutputResponse(data)
-                    setTestNodeLoading(false)
+    const simulateSchedulerNode = () => {
+        const selectedNode = nodes.find((nd) => nd.id === nodeId);
+        if (!selectedNode) {
+            console.error("Selected node not found.");
+            return;
+        }
+
+        // Extract the schedule configuration
+        const { inputParameters } = selectedNode;
+        const pattern = inputParameters.find(param => param.name === 'pattern').default;
+        const specificDateTime = inputParameters.find(param => param.name === 'specificDateTime').default;
+        const scheduleTimes = inputParameters.find(param => param.name === 'scheduleTimes').array;
+
+        console.log("Simulating scheduler node with pattern:", pattern, "specificDateTime:", specificDateTime, "scheduleTimes:", scheduleTimes);
+
+        // Simulate the scheduler execution based on the configuration
+        simulateScheduleExecution(pattern, specificDateTime, scheduleTimes);
+    };
+
+    const simulateScheduleExecution = (pattern, specificDateTime, scheduleTimes) => {
+        if (pattern === 'once' && specificDateTime) {
+            const delay = new Date(specificDateTime) - new Date();
+            if (delay > 0) {
+                setTimeout(() => {
+                    const simulatedResponse = [{ message: `Workflow triggered at ${new Date().toISOString()}` }];
+                    console.log("Simulated response:", simulatedResponse);
+                    setOutputResponse(simulatedResponse);
+                    setTestNodeLoading(false);
                     const formValues = {
                         submit: true,
                         needRetest: null,
-                        output: data
-                    }
-                    onSubmit(formValues, 'outputResponses')
-                    socket.disconnect()
-                })
-            } else {
-                testNodeApi.request(nodeFlowData.name, testNodeBody)
+                        output: simulatedResponse,
+                    };
+                    onSubmit(formValues, 'outputResponses');
+                }, delay);
             }
-        } catch (error) {
-            setTestNodeLoading(false)
-            setOutputResponse([])
-            setErrorResponse(error)
-            console.error(error)
+        } else if (pattern === 'repetitive' && scheduleTimes) {
+            console.log("Setting up repetitive schedule:", scheduleTimes);
+            scheduleTimes.forEach((schedule) => {
+                const interval = calculateInterval(schedule);
+                if (interval > 0) {
+                    const cronPattern = `*/${interval} * * * * *`;
+                    const job = new Cronr(cronPattern, () => {
+                        const simulatedResponse = { message: `Workflow triggered at ${new Date().toISOString()}` };
+                        console.log("Cron job triggered response:", simulatedResponse);
+                        setOutputResponse((prev) => [...prev, simulatedResponse]);
+                    });
+                    job.start();
+                }
+            });
+            setTestNodeLoading(false);
         }
-    }
+    };
+
+    const calculateInterval = (schedule) => {
+        if (schedule.mode === 'everyX') {
+            const unitMultipliers = {
+                seconds: 1,
+                minutes: 60,
+                hours: 60 * 60,
+            };
+            return schedule.value * unitMultipliers[schedule.unit];
+        }
+        // Add more logic here for other modes if necessary
+        return 0;
+    };
 
     const checkIfTestNodeValid = () => {
-        const paramsTypes = nodeParamsType.filter((type) => type !== 'outputResponses')
+        const paramsTypes = nodeParamsType.filter((type) => type !== 'outputResponses');
         for (let i = 0; i < paramsTypes.length; i += 1) {
-            const paramType = paramsTypes[i]
+            const paramType = paramsTypes[i];
 
             if (!nodeFlowData[paramType] || !nodeFlowData[paramType].submit) {
-                return true
+                return true;
             }
         }
-        return false
-    }
+        return false;
+    };
 
     const openAttachmentDialog = (outputResponse) => {
         const dialogProp = {
             title: 'Attachments',
             executionData: outputResponse
-        }
-        setAttachmentDialogProps(dialogProp)
-        setShowAttachmentDialog(true)
-    }
+        };
+        setAttachmentDialogProps(dialogProp);
+        setShowAttachmentDialog(true);
+    };
 
     const openHTMLDialog = (executionData) => {
         const dialogProp = {
             title: 'HTML',
             executionData
-        }
-        setHTMLDialogProps(dialogProp)
-        setShowHTMLDialog(true)
-    }
+        };
+        setHTMLDialogProps(dialogProp);
+        setShowHTMLDialog(true);
+    };
 
     const onExpandDialogClicked = (executionData) => {
         const dialogProp = {
             title: `Output Responses: ${nodeLabel} `,
             data: executionData
-        }
-        setExpandDialogProps(dialogProp)
-        setShowExpandDialog(true)
-    }
+        };
+        setExpandDialogProps(dialogProp);
+        setShowExpandDialog(true);
+    };
 
     useEffect(() => {
         if (nodeFlowData && nodeFlowData.outputResponses && nodeFlowData.outputResponses.output) {
-            setOutputResponse(nodeFlowData.outputResponses.output)
+            setOutputResponse(nodeFlowData.outputResponses.output);
         } else {
-            setOutputResponse([])
+            setOutputResponse([]);
         }
 
-        disableTestNodeBtn(checkIfTestNodeValid())
+        disableTestNodeBtn(checkIfTestNodeValid());
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodeFlowData, nodeParamsType])
+    }, [nodeFlowData, nodeParamsType]);
 
     useEffect(() => {
         if (nodes && nodeId) {
-            const selectedNode = nodes.find((nd) => nd.id === nodeId)
+            const selectedNode = nodes.find((nd) => nd.id === nodeId);
             if (selectedNode) {
-                setNodeName(selectedNode.data.name)
-                setNodeType(selectedNode.data.type)
-                setNodeLabel(selectedNode.data.label)
+                setNodeName(selectedNode.data.name);
+                setNodeType(selectedNode.data.type);
+                setNodeLabel(selectedNode.data.label);
             }
         }
-    }, [nodes, nodeId])
+    }, [nodes, nodeId]);
 
     // Test node successful
     useEffect(() => {
-        if (testNodeApi.data && nodeType && nodeType !== 'webhook') {
-            const testNodeData = testNodeApi.data
-            setOutputResponse(testNodeData)
-            setErrorResponse(null)
+        if (testNodeApi.data && nodeType && nodeType !== 'scheduler') {
+            const testNodeData = testNodeApi.data;
+            setOutputResponse(testNodeData);
+            setErrorResponse(null);
             const formValues = {
                 submit: true,
                 needRetest: null,
                 output: testNodeData
-            }
-            onSubmit(formValues, 'outputResponses')
+            };
+            onSubmit(formValues, 'outputResponses');
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [testNodeApi.data])
+    }, [testNodeApi.data]);
 
     useEffect(() => {
-        getTunnelURLApi.request()
+        getTunnelURLApi.request();
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (getTunnelURLApi.data) {
-            setTunnelURL(getTunnelURLApi.data)
+            setTunnelURL(getTunnelURLApi.data);
         }
-    }, [getTunnelURLApi.data])
+    }, [getTunnelURLApi.data]);
 
     // Test node error
     useEffect(() => {
-        if (testNodeApi.error && nodeType && nodeType !== 'webhook') {
-            let errorMessage = 'Unexpected Error.'
+        if (testNodeApi.error && nodeType && nodeType !== 'scheduler') {
+            let errorMessage = 'Unexpected Error.';
 
             if (testNodeApi.error.response && testNodeApi.error.response.data) {
-                errorMessage = testNodeApi.error.response.data
+                errorMessage = testNodeApi.error.response.data;
             } else if (testNodeApi.error.message) {
-                errorMessage = testNodeApi.error.message
+                errorMessage = testNodeApi.error.message;
             }
 
-            setErrorResponse(errorMessage)
-            setOutputResponse([])
+            setErrorResponse(errorMessage);
+            setOutputResponse([]);
             const formValues = {
                 submit: null,
                 needRetest: null,
                 output: []
-            }
-            onSubmit(formValues, 'outputResponses')
+            };
+            onSubmit(formValues, 'outputResponses');
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [testNodeApi.error])
+    }, [testNodeApi.error]);
 
     // Test node loading
     useEffect(() => {
-        if (nodeType && nodeType !== 'webhook') setTestNodeLoading(testNodeApi.loading)
+        if (nodeType && nodeType !== 'webhook' && nodeType !== 'scheduler') setTestNodeLoading(testNodeApi.loading);
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [testNodeApi.loading])
+    }, [testNodeApi.loading]);
 
     return (
         <>
@@ -237,7 +340,7 @@ const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, w
                 {nodeName && (nodeName === 'webhook' || nodeName === 'chainLinkFunctionWebhook') && (
                     <Box sx={{ mb: 3 }}>
                         <Typography variant='h5' sx={{ mb: 1 }}>
-                            Local URL:
+                            Webhook URL:
                         </Typography>
                         <Typography
                             variant='h5'
@@ -251,14 +354,14 @@ const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, w
                                 mr: 2
                             }}
                         >
-                            {`${baseURL}/api/v1/webhook/${nodeFlowData.webhookEndpoint}`}
+                            {`https://workflow-function.vercel.app/api/v1/webhook/${workflow.shortId}`}
                         </Typography>
                         <Stack direction='row' spacing={2}>
                             <Button
                                 size='small'
                                 variant='outlined'
                                 startIcon={<IconCopy />}
-                                onClick={() => navigator.clipboard.writeText(`${baseURL}/api/v1/webhook/${nodeFlowData.webhookEndpoint}`)}
+                                onClick={() => navigator.clipboard.writeText(`https://workflow-function.vercel.app/api/v1/webhook/${workflow.shortId}`)}
                             >
                                 Copy URL
                             </Button>
@@ -266,7 +369,7 @@ const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, w
                                 size='small'
                                 variant='outlined'
                                 startIcon={<IconArrowUpRightCircle />}
-                                onClick={() => window.open(`${baseURL}/api/v1/webhook/${nodeFlowData.webhookEndpoint}`, '_blank')}
+                                onClick={() => window.open(`https://workflow-function.vercel.app/api/v1/webhook/${workflow.shortId}`, '_blank')}
                             >
                                 Open in New Tab
                             </Button>
@@ -274,7 +377,7 @@ const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, w
                         {tunnelURL && (
                             <div>
                                 <Typography variant='h5' sx={{ mb: 1, mt: 2 }}>
-                                    Tunnel URL:
+                                    COMING SOON - Private Tunnel URL:
                                 </Typography>
                                 <Typography
                                     variant='h5'
@@ -445,8 +548,8 @@ const OutputResponses = ({ nodeId, nodeParamsType, nodeFlowData, nodes, edges, w
                 onCancel={() => setShowExpandDialog(false)}
             ></ExpandDataDialog>
         </>
-    )
-}
+    );
+};
 
 OutputResponses.propTypes = {
     nodeId: PropTypes.string,
@@ -456,6 +559,6 @@ OutputResponses.propTypes = {
     edges: PropTypes.array,
     workflow: PropTypes.object,
     onSubmit: PropTypes.func
-}
+};
 
-export default OutputResponses
+export default OutputResponses;
